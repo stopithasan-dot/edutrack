@@ -1,0 +1,88 @@
+{% extends 'dashboard/teacher_dashboard.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Mark Attendance | EduTrack{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom border-secondary">
+    <h1 class="h2">Mark Attendance</h1>
+</div>
+
+<div class="card p-3 mb-4">
+    <form method="get" class="row gx-3 gy-2 align-items-center">
+        <div class="col-sm-3">
+            {{ form.class_ref|as_crispy_field }}
+        </div>
+        <div class="col-sm-3">
+            {{ form.subject|as_crispy_field }}
+        </div>
+        <div class="col-sm-3">
+            {{ form.date|as_crispy_field }}
+        </div>
+        <div class="col-auto mt-4">
+            <button type="submit" class="btn btn-primary">Load Students</button>
+        </div>
+    </form>
+</div>
+
+{% if students is not None %}
+<div class="card p-4">
+    <h4 class="mb-3">Attendance for {{ subject.name }} on {{ date }}</h4>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="subject_id" value="{{ subject.id }}">
+        <input type="hidden" name="date" value="{{ date }}">
+        
+        <div class="d-flex justify-content-end mb-3">
+            <button type="button" class="btn btn-sm btn-outline-success me-2" onclick="markAll('present')">Mark All Present</button>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll('absent')">Mark All Absent</button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.get_full_name }} ({{ student.username }})</td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="student_{{ student.id }}" id="present_{{ student.id }}" value="present" autocomplete="off">
+                                <label class="btn btn-outline-success" for="present_{{ student.id }}">Present</label>
+
+                                <input type="radio" class="btn-check" name="student_{{ student.id }}" id="absent_{{ student.id }}" value="absent" autocomplete="off" checked>
+                                <label class="btn btn-outline-danger" for="absent_{{ student.id }}">Absent</label>
+
+                                <input type="radio" class="btn-check" name="student_{{ student.id }}" id="late_{{ student.id }}" value="late" autocomplete="off">
+                                <label class="btn btn-outline-warning" for="late_{{ student.id }}">Late</label>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center text-muted">No students in this class.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if students %}
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-primary btn-lg">Submit Attendance</button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+<script>
+    function markAll(status) {
+        document.querySelectorAll('input[value="' + status + '"]').forEach(radio => {
+            radio.checked = true;
+        });
+    }
+</script>
+{% endif %}
+{% endblock %}

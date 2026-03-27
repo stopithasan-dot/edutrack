@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login | EduTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow-lg border-0 bg-dark text-white">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold"><i class="bi bi-box-arrow-in-right text-primary"></i> Welcome Back</h2>
+                    <p class="text-muted">Sign in to your dashboard</p>
+                </div>
+                
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    Incorrect username or password. Please try again.
+                </div>
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p class="mb-0 text-muted">Is your institution not registered? <a href="{% url 'institution_register' %}" class="text-primary text-decoration-none">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

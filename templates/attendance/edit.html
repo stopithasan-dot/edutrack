@@ -1,0 +1,76 @@
+{% extends 'dashboard/teacher_dashboard.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit Attendance | EduTrack{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom border-secondary">
+    <h1 class="h2">Edit Attendance</h1>
+</div>
+
+<div class="card p-3 mb-4">
+    <form method="get" class="row gx-3 gy-2 align-items-center">
+        <div class="col-sm-3">
+            {{ form.class_ref|as_crispy_field }}
+        </div>
+        <div class="col-sm-3">
+            {{ form.subject|as_crispy_field }}
+        </div>
+        <div class="col-sm-3">
+            {{ form.date|as_crispy_field }}
+        </div>
+        <div class="col-auto mt-4">
+            <button type="submit" class="btn btn-primary">Load Records</button>
+        </div>
+    </form>
+</div>
+
+{% if attendances is not None %}
+<div class="card p-4">
+    <h4 class="mb-3">Editing Attendance for {{ subject.name }} on {{ date }}</h4>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="subject_id" value="{{ subject.id }}">
+        <input type="hidden" name="date" value="{{ date }}">
+        
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendances %}
+                    <tr>
+                        <td>{{ record.student.get_full_name }} ({{ record.student.username }})</td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="attendance_{{ record.id }}" id="present_{{ record.id }}" value="present" {% if record.status == 'present' %}checked{% endif %}>
+                                <label class="btn btn-outline-success" for="present_{{ record.id }}">Present</label>
+
+                                <input type="radio" class="btn-check" name="attendance_{{ record.id }}" id="absent_{{ record.id }}" value="absent" {% if record.status == 'absent' %}checked{% endif %}>
+                                <label class="btn btn-outline-danger" for="absent_{{ record.id }}">Absent</label>
+
+                                <input type="radio" class="btn-check" name="attendance_{{ record.id }}" id="late_{{ record.id }}" value="late" {% if record.status == 'late' %}checked{% endif %}>
+                                <label class="btn btn-outline-warning" for="late_{{ record.id }}">Late</label>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center text-muted">No attendance records found for this date.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if attendances %}
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-primary btn-lg">Update Attendance</button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endif %}
+{% endblock %}

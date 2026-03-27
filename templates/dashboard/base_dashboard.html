@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    .sidebar {
+        min-height: calc(100vh - 56px);
+        background-color: var(--surface-color);
+        border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar .nav-link {
+        color: var(--text-light);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.2rem;
+    }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+        background-color: rgba(79, 70, 229, 0.1);
+        color: var(--primary);
+    }
+    .sidebar .nav-link i {
+        width: 24px;
+        text-align: center;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+</div> <!-- Close the container from base.html to allow full width for dashboard -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
+            <div class="position-sticky pt-3 pb-4">
+                <ul class="nav flex-column mb-auto">
+                    {% block sidebar_nav %}
+                    <!-- Role specific nav items here -->
+                    {% endblock %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block dashboard_content %}{% endblock %}
+        </main>
+    </div>
+</div>
+<div> <!-- Open a dummy div so base.html closes correctly -->
+{% endblock %}

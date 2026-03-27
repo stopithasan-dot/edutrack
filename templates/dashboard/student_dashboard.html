@@ -1,0 +1,102 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Student Dashboard | EduTrack{% endblock %}
+
+{% block sidebar_nav %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'student_dashboard' %}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'notice_list' %}">
+        <i class="bi bi-megaphone"></i> Notices
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'download_report' %}">
+        <i class="bi bi-file-earmark-pdf"></i> Download Report
+    </a>
+</li>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom border-secondary">
+    <h1 class="h2">Student Dashboard</h1>
+</div>
+
+{% if show_warning %}
+<div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i> Warning! Your cumulative attendance is below the {{ threshold }}% threshold.
+</div>
+{% endif %}
+
+<div class="row mb-4">
+    <!-- Doughnut Chart for Cumulative Attendance -->
+    <div class="col-md-4 mb-4 mb-md-0">
+        <div class="card h-100">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">Cumulative Attendance</h5>
+            </div>
+            <div class="card-body d-flex justify-content-center align-items-center position-relative">
+                <canvas id="cumulativeChart" height="200" width="200"></canvas>
+                <div class="position-absolute fs-3 fw-bold">{{ cumulative }}%</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Subject Wise Cards -->
+    <div class="col-md-8">
+        <h5 class="mb-3">Subject Wise Attendance</h5>
+        <div class="row g-3">
+            {% for stat in subject_stats %}
+            <div class="col-md-6">
+                <div class="card border-{{ stat.color }} border-start border-4">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase mb-2">{{ stat.subject.name }}</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">{{ stat.percent }}%</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-secondary">No subjects found for your class.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('cumulativeChart').getContext('2d');
+    const cumulative = parseFloat("{{ cumulative|default:0 }}");
+    const remainder = Math.max(0, 100 - cumulative);
+    const color = cumulative >= 75 ? '#10B981' : (cumulative >= 65 ? '#F59E0B' : '#EF4444');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Present', 'Absent'],
+            datasets: [{
+                data: [cumulative, remainder],
+                backgroundColor: [color, 'rgba(255, 255, 255, 0.1)'],
+                borderWidth: 0,
+                cutout: '80%'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Admin Dashboard | EduTrack{% endblock %}
+
+{% block sidebar_nav %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'inst_dashboard' %}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'teacher_list' %}">
+        <i class="bi bi-person-badge"></i> Teachers
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'student_list' %}">
+        <i class="bi bi-people"></i> Students
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'class_list' %}">
+        <i class="bi bi-journal-text"></i> Classes
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'subject_list' %}">
+        <i class="bi bi-book"></i> Subjects
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'notice_list' %}">
+        <i class="bi bi-megaphone"></i> Notices
+    </a>
+</li>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom border-secondary">
+    <h1 class="h2">Admin Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'teacher_add' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg"></i> Add Teacher</a>
+            <a href="{% url 'student_add' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg"></i> Add Student</a>
+        </div>
+        <a href="{% url 'notice_add' %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-megaphone-fill"></i> Post Notice
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card h-100 border-primary border-start border-4">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-2">Total Teachers</h6>
+                <h3 class="mb-0">{{ total_teachers }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-success border-start border-4">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-2">Total Students</h6>
+                <h3 class="mb-0">{{ total_students }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-info border-start border-4">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-2">Total Classes</h6>
+                <h3 class="mb-0">{{ total_classes }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-warning border-start border-4">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase mb-2">Today's Attendance</h6>
+                <h3 class="mb-0">{{ today_attendance_percent }}%</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Chart -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0"><i class="bi bi-bar-chart-fill text-primary"></i> Attendance Overview</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="attendanceChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Recent Activity -->
+    <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="card h-100">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0"><i class="bi bi-activity text-secondary"></i> Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <small class="text-muted">Today', '09:00 AM</small>
+                        <p class="mb-0">Attendance marked for Class 10A</p>
+                    </li>
+                    <li class="mb-3">
+                        <small class="text-muted">Yesterday', '02:30 PM</small>
+                        <p class="mb-0">New Teacher John Added</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            datasets: [{
+                label: 'Attendance %',
+                data: [95, 92, 88, 96, 90],
+                backgroundColor: 'rgba(79, 70, 229, 0.5)',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#F1F5F9' }
+                },
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#F1F5F9' }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: '#F1F5F9' } }
+            }
+        }
+    });
+</script>
+{% endblock %}

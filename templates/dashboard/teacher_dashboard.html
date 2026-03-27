@@ -1,0 +1,137 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Teacher Dashboard | EduTrack{% endblock %}
+
+{% block sidebar_nav %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'teacher_dashboard' %}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'attendance_mark' %}">
+        <i class="bi bi-calendar-check"></i> Mark Attendance
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'attendance_edit' %}">
+        <i class="bi bi-pencil-square"></i> Edit Attendance
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'notice_list' %}">
+        <i class="bi bi-megaphone"></i> Notices
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="#" onclick="alert('Student specific reports can be downloaded from their profiles'); return false;">
+        <i class="bi bi-file-earmark-pdf"></i> Class Reports
+    </a>
+</li>
+<li class="nav-item mt-4 pt-3 border-top border-secondary">
+    <a class="nav-link text-info" href="{% url 'teacher_profile_edit' %}">
+        <i class="bi bi-person-circle"></i> My Profile
+    </a>
+</li>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom border-secondary">
+    <h1 class="h2">Teacher Dashboard</h1>
+</div>
+<p class="lead">Welcome back, {{ request.user.get_full_name }}!</p>
+
+<div class="d-flex justify-content-between align-items-center mt-5 mb-3">
+    <h4 class="mb-0">Your Classes & Student Performance</h4>
+    {% if teacher_classes_data %}
+    <div style="width: 250px;">
+        <select class="form-select bg-dark text-white border-secondary" id="classSelector">
+            <option value="all">Show All Classes</option>
+            {% for cls_data in teacher_classes_data %}
+            <option value="class-{{ cls_data.class.id }}">{{ cls_data.class.name }} {{ cls_data.class.section|default:"" }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+</div>
+
+{% if teacher_classes_data %}
+    <div class="row row-cols-1 row-cols-xl-2 g-4" id="classCardsContainer">
+    {% for cls_data in teacher_classes_data %}
+        <div class="col class-card-item" data-class-id="class-{{ cls_data.class.id }}">
+            <div class="card bg-dark border-secondary h-100 shadow-sm">
+                <div class="card-header border-secondary d-flex justify-content-between align-items-center bg-transparent">
+                    <h5 class="mb-0 text-white"><i class="bi bi-people-fill me-2 text-primary"></i>{{ cls_data.class.name }} <span class="badge bg-secondary ms-2">{{ cls_data.class.section|default:"" }}</span></h5>
+                    <span class="badge bg-primary rounded-pill">{{ cls_data.total_students }} Students</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover table-borderless align-middle mb-0">
+                            <thead class="table-dark-subtle border-bottom border-secondary">
+                                <tr>
+                                    <th class="ps-3 py-3">Student Name</th>
+                                    <th class="py-3">Overall Attendance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for st_data in cls_data.students %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <a href="{% url 'student_profile_teacher' st_data.student.id %}" class="text-decoration-none text-info fw-medium">
+                                            {{ st_data.student.get_full_name }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-{{ st_data.color }} rounded-pill me-2 w-25 text-center">{{ st_data.percent }}%</span>
+                                            <div class="progress flex-grow-1" style="height: 6px; background-color: #343a40;">
+                                                <div class="progress-bar bg-{{ st_data.color }}" role="progressbar" style="width: {{ st_data.percent }}%" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-4">No students enrolled in this class.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-dark text-muted mt-3">
+        <i class="bi bi-info-circle me-2"></i> You have no assigned classes yet.
+    </div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selector = document.getElementById('classSelector');
+    if (selector) {
+        selector.addEventListener('change', function() {
+            const selectedClass = this.value;
+            const cards = document.querySelectorAll('.class-card-item');
+            
+            cards.forEach(card => {
+                if (selectedClass === 'all' || card.getAttribute('data-class-id') === selectedClass) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+        
+        // Optionally select the first class by default if there are any
+        if (selector.options.length > 1) {
+            selector.selectedIndex = 1;
+            selector.dispatchEvent(new Event('change'));
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'dashboard/admin_dashboard.html' %}
+
+{% block title %}Analytics & Reports | EduTrack{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom border-secondary">
+    <h1 class="h2">Analytics & Reports</h1>
+</div>
+
+<div class="row mb-4">
+    <!-- Bar chart: Subject-wise attendance comparison -->
+    <div class="col-lg-6 mb-4 mb-lg-0">
+        <div class="card h-100 border-0 bg-dark shadow-sm">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">Subject-wise Attendance</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="subjectChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Line chart: Monthly attendance trend -->
+    <div class="col-lg-6">
+        <div class="card h-100 border-0 bg-dark shadow-sm">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="mb-0">Monthly Attendance Trend</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="trendChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 bg-dark shadow-sm mb-4">
+    <div class="card-header bg-transparent border-bottom border-secondary">
+        <h5 class="mb-0">Student Leaderboard (Top 10)</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-dark table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Student Name</th>
+                    <th>Class</th>
+                    <th>Attendance %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in leaderboard %}
+                <tr>
+                    <td>#{{ forloop.counter }}</td>
+                    <td>{{ entry.student.get_full_name }}</td>
+                    <td>{{ entry.student.class_ref.name|default:"-" }}</td>
+                    <td>
+                        <span class="badge border border-{{ entry.percent|gte:75|yesno:'success,danger' }} text-{{ entry.percent|gte:75|yesno:'success,danger' }}">
+                            {{ entry.percent }}%
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center text-muted py-3">No attendance data available.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{{ subject_names|json_script:"subjectNames" }}
+{{ subject_percents|json_script:"subjectPercents" }}
+{{ months|json_script:"months" }}
+{{ monthly_data|json_script:"monthlyData" }}
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    const subjectNames = JSON.parse(document.getElementById('subjectNames').textContent);
+    const subjectPercents = JSON.parse(document.getElementById('subjectPercents').textContent);
+    
+    new Chart(document.getElementById('subjectChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: subjectNames,
+            datasets: [{
+                label: 'Attendance %',
+                data: subjectPercents,
+                backgroundColor: 'rgba(6, 182, 212, 0.5)',
+                borderColor: '#06B6D4',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    const months = JSON.parse(document.getElementById('months').textContent);
+    const monthlyData = JSON.parse(document.getElementById('monthlyData').textContent);
+    
+    new Chart(document.getElementById('trendChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Trend %',
+                data: monthlyData,
+                borderColor: '#10B981',
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(16, 185, 129, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+{% endblock %}

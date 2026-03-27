@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register Institution | EduTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card p-4">
+            <div class="text-center mb-4">
+                <h2><i class="bi bi-building text-primary"></i> Register Institution</h2>
+                <p class="text-muted">Join EduTrack and manage your institution efficiently</p>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <h5 class="mb-3 border-bottom pb-2">Institution Details</h5>
+                <div class="row">
+                    <div class="col-12">{{ form.name|as_crispy_field }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">{{ form.email|as_crispy_field }}</div>
+                    <div class="col-md-6">{{ form.phone|as_crispy_field }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">{{ form.slug|as_crispy_field }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-12">{{ form.address|as_crispy_field }}</div>
+                </div>
+
+                <h5 class="mt-4 mb-3 border-bottom pb-2">Admin Account</h5>
+                <div class="row">
+                    <div class="col-md-6">{{ form.admin_first_name|as_crispy_field }}</div>
+                    <div class="col-md-6">{{ form.admin_last_name|as_crispy_field }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">{{ form.admin_email|as_crispy_field }}</div>
+                    <div class="col-md-6">{{ form.admin_password|as_crispy_field }}</div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+                </div>
+            </form>
+            
+            <div class="text-center mt-3">
+                <small class="text-muted">Already registered? 
+                    <a href="{% url 'login' %}" class="text-primary text-decoration-none">Login here</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
