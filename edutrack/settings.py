@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=kwk1$t2)gshc+z-=ft=g9ce)%d^%e)==mrfi+bae9p#!1z@@o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["edutrack-10vi.onrender.com"]
 
 
 # Application definition
